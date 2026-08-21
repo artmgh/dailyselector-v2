@@ -1,0 +1,27 @@
+# Konfiguracja wdrożenia na Render (https://render.com).
+# Po wskazaniu tego repozytorium Render sam utworzy usługę i bazę,
+# a DATABASE_URL wstrzyknie do aplikacji.
+#
+# Jedyne, co trzeba ustawić ręcznie, to APP_PASSWORD — hasło wejścia do appki.
+
+services:
+  - type: web
+    name: dailyselector-v2
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: node server.js
+    healthCheckPath: /api/auth-check
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_PASSWORD
+        sync: false # ustawiasz w panelu Render, nie trzymamy hasła w repo
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dailyselector-v2-db
+          property: connectionString
+
+databases:
+  - name: dailyselector-v2-db
+    plan: free

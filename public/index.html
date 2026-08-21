@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kto prowadzi daily?</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="top-row">
+    <h1>Kto prowadzi daily?</h1>
+    <div class="toolbar">
+      <nav class="tabs">
+        <button class="tab active" data-view="wheel">Losowanie</button>
+        <button class="tab" data-view="manage">Zarządzanie</button>
+      </nav>
+      <button id="soundBtn" class="sound-btn" data-tip="Włącz lub wycisz dźwięki losowania">🔊</button>
+    </div>
+    </div>
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>KTO PROWADZI DAILY ✦ LOSOWANIE ✦ BEZ POWTÓREK ✦ KTO PROWADZI DAILY ✦ LOSOWANIE ✦ BEZ POWTÓREK ✦</span>
+        <span>KTO PROWADZI DAILY ✦ LOSOWANIE ✦ BEZ POWTÓREK ✦ KTO PROWADZI DAILY ✦ LOSOWANIE ✦ BEZ POWTÓREK ✦</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== WIDOK: LOSOWANIE ===== -->
+  <main id="view-wheel" class="view active">
+
+    <section class="current" id="currentBox">
+      <div class="current-label">W tym tygodniu prowadzi</div>
+      <div class="current-name" id="currentName">—</div>
+      <div class="current-meta" id="currentMeta"></div>
+    </section>
+
+    <section class="wheel-section">
+      <button id="clearPenaltiesBtn" class="reset-wheel-btn tip-end"
+              data-tip="Zdejmuje wszystkie kary — koło wraca do stanu sprzed karania">↻</button>
+      <div class="wheel-stage">
+      <div class="wheel-holder">
+        <div class="pointer" id="pointer"></div>
+        <svg id="wheel" viewBox="0 0 400 400" class="wheel">
+          <defs>
+            <!-- połysk: światło z góry po lewej, jak na lakierowanej tarczy -->
+            <radialGradient id="gloss" cx="32%" cy="24%" r="76%">
+              <stop offset="0%"   stop-color="#fff" stop-opacity="0.42"/>
+              <stop offset="45%"  stop-color="#fff" stop-opacity="0.10"/>
+              <stop offset="72%"  stop-color="#000" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#000" stop-opacity="0.24"/>
+            </radialGradient>
+            <radialGradient id="hubGloss" cx="35%" cy="28%" r="75%">
+              <stop offset="0%"   stop-color="#fff" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#fff" stop-opacity="0.1"/>
+            </radialGradient>
+          </defs>
+
+          <!-- nieruchoma obręcz z żarówkami -->
+          <g id="wheelFrame"></g>
+
+          <!-- obracająca się tarcza -->
+          <g id="wheelRotor"></g>
+
+          <!-- połysk na wierzchu tarczy, nie łapie kliknięć -->
+          <circle cx="200" cy="200" r="168" fill="url(#gloss)" pointer-events="none"/>
+
+          <!-- piasta -->
+          <circle cx="200" cy="200" r="38" class="hub"/>
+          <circle cx="200" cy="200" r="29" class="hub-inner"/>
+          <circle cx="200" cy="200" r="29" fill="url(#hubGloss)" pointer-events="none"/>
+          <text x="200" y="209" class="hub-text">🎲</text>
+        </svg>
+        <div class="countdown" id="countdown"></div>
+      </div>
+      </div>
+
+      <button id="drawBtn" class="draw-btn">Zakręć kołem</button>
+      <p class="pool-info" id="poolInfo"></p>
+      <p class="wheel-tip">Spóźnialski? Kliknij jego imię na kole — pojawi się tam 5 razy przy najbliższym losowaniu. Kolejny klik zdejmuje karę.</p>
+      <button id="undoTopBtn" class="undo-link" data-tip="Przywraca stan sprzed ostatniego losowania: osoba wraca na koło, licznik i data się cofają">↩ Cofnij ostatnie losowanie</button>
+    </section>
+
+    <section class="waiting" id="waitingBox">
+      <h2>Jeszcze nie prowadzili w tej rundzie</h2>
+      <div class="chips" id="waitingChips"></div>
+    </section>
+
+  </main>
+
+  <!-- ===== WIDOK: ZARZĄDZANIE ===== -->
+  <main id="view-manage" class="view">
+
+    <section class="panel">
+      <h2>Ekipa</h2>
+      <p class="hint">Odznacz „w grze", gdy ktoś ma urlop — wypada z losowania, ale nie traci swojej kolejki.</p>
+      <form id="addForm" class="add-form">
+        <input id="newName" type="text" placeholder="Imię i nazwisko" autocomplete="off" required
+               data-tip="Wpisz imię i nazwisko, a potem kliknij Dodaj">
+        <button type="submit" class="tip-end" data-tip="Dodaje osobę do puli i od razu ustawia ją w kolejce bieżącej rundy">Dodaj</button>
+      </form>
+      <div id="peopleList" class="people-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Historia losowań</h2>
+      <p class="hint">Cofnięcie przywraca stan sprzed ostatniego losowania: osoba wraca na koło, licznik i data się zmniejszają, a bieżący tydzień wraca do poprzedniego wyniku.</p>
+      <button id="undoBtn" class="undo-btn" data-tip="Kasuje ostatni wpis i przywraca dane sprzed niego">↩ Cofnij ostatnie losowanie</button>
+      <ul id="historyList" class="history-list"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Dane</h2>
+      <p class="hint">Wszystko siedzi na serwerze. Zgraj kopię przed większymi zmianami.</p>
+      <div class="data-actions">
+        <button id="exportBtn" data-tip="Pobiera plik JSON z całą ekipą, historią i bieżącą rundą">Eksportuj</button>
+        <label class="import-label" data-tip="Wgrywa wcześniejszą kopię — nadpisuje wszystko, co jest teraz">
+          Importuj
+          <input id="importInput" type="file" accept="application/json" hidden>
+        </label>
+        <button id="resetBtn" class="danger tip-end" data-tip="Kasuje ekipę, historię i bieżący tydzień. Nie da się cofnąć — najpierw zrób eksport">Wyczyść wszystko</button>
+      </div>
+      <button id="logoutBtn" class="logout-btn" hidden data-tip="Kończy sesję na tym urządzeniu — następne wejście znów poprosi o hasło">Wyloguj się</button>
+    </section>
+
+  </main>
+</div>
+
+<canvas id="confetti" class="confetti"></canvas>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

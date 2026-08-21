@@ -1,0 +1,11 @@
+node_modules/
+
+# dane zespołu — nie trafiają do repozytorium
+data.json
+data.snapshot-*.json
+
+# śmieci systemowe
+.DS_Store
+
+# lokalne zmienne środowiskowe
+.env

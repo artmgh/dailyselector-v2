@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kto prowadzi daily?</title>
+<style>
+  :root {
+    --bg: #efedeb; --surface: #fff; --surface-2: #f5f5f6;
+    --ink: #14181f; --muted: #8b8f98; --blue: #a8dcec; --red: #e74c3c;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+    display: grid; place-items: center; padding: 20px;
+  }
+  .karta {
+    background: var(--surface); border-radius: 26px; padding: 32px 28px;
+    box-shadow: 0 6px 20px rgba(20,24,31,.07), 0 1px 3px rgba(20,24,31,.05);
+    width: min(380px, 100%); text-align: center;
+  }
+  .kolo { font-size: 2.4rem; line-height: 1; margin-bottom: 14px; }
+  h1 { margin: 0 0 6px; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; }
+  p { margin: 0 0 22px; font-size: .87rem; color: var(--muted); line-height: 1.5; }
+  input {
+    width: 100%; padding: 14px 16px; border: 1px solid transparent;
+    border-radius: 14px; background: var(--surface-2); color: var(--ink);
+    font-size: .95rem; font-family: inherit; font-weight: 500; text-align: center;
+  }
+  input:focus { outline: none; background: #fff; border-color: var(--blue); }
+  button {
+    width: 100%; margin-top: 10px; padding: 15px; border: none; border-radius: 999px;
+    background: var(--ink); color: #fff; font-family: inherit;
+    font-weight: 700; font-size: .95rem; cursor: pointer;
+  }
+  button:active { transform: scale(.985); }
+  .blad { margin-top: 14px; font-size: .84rem; font-weight: 600; color: var(--red); min-height: 20px; }
+</style>
+</head>
+<body>
+  <form class="karta" id="form">
+    <div class="kolo">🎡</div>
+    <h1>Kto prowadzi daily?</h1>
+    <p>Ta appka jest zamknięta na hasło. Podaj je, żeby wejść.</p>
+    <input id="haslo" type="password" placeholder="Hasło" autocomplete="current-password" autofocus required>
+    <button type="submit">Wejdź</button>
+    <div class="blad" id="blad"></div>
+  </form>
+
+<script>
+  const form = document.getElementById('form');
+  const blad = document.getElementById('blad');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    blad.textContent = '';
+    try {
+      const r = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: document.getElementById('haslo').value })
+      });
+      if (r.ok) location.href = '/';
+      else blad.textContent = (await r.json()).error || 'Nie udało się zalogować.';
+    } catch {
+      blad.textContent = 'Brak połączenia z serwerem.';
+    }
+  });
+</script>
+</body>
+</html>
